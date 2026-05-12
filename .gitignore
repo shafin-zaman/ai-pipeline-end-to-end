@@ -1,0 +1,11 @@
+.env
+.env.local
+output/
+logs/
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.npm-cache/
+.shared-repo/
+uv.lock
