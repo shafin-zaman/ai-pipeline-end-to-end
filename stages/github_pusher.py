@@ -73,6 +73,8 @@ def _ensure_shared_repo(base_branch: str) -> None:
             ["git", "clone", _remote_url(), _SHARED_REPO],
             capture_output=True, text=True,
         )
+        _git(["config", "user.email", "shafinzaman42@gmail.com"], cwd=_SHARED_REPO)
+        _git(["config", "user.name", "shafin-zaman"], cwd=_SHARED_REPO)
     else:
         # Remote has no base branch — init and push one
         log.info("Initialising shared repo with initial commit on %s…", base_branch)
@@ -123,6 +125,11 @@ def push(issue_key: str, summary: str, out_dir: str) -> dict:
             shutil.copytree(src, dst, ignore=shutil.ignore_patterns("node_modules", ".git"))
         else:
             shutil.copy2(src, dst)
+
+    # Always include vercel.json so Vercel serves as static site, not Python/Node build
+    import json as _json
+    with open(os.path.join(_SHARED_REPO, "vercel.json"), "w") as _vf:
+        _json.dump({"buildCommand": None, "outputDirectory": ".", "framework": None}, _vf)
 
     # Stage and commit
     _git(["add", "-A"], cwd=_SHARED_REPO)
