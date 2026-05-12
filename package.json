@@ -1,0 +1,20 @@
+{
+  "name": "pipeline-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest --testEnvironment jsdom --json --outputFile=test-run-raw.json"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "@testing-library/dom": "^9.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/user-event": "^14.0.0"
+  }
+}

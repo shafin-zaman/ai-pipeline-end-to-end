@@ -1,0 +1,6 @@
+Typing markdown on the left updates the preview in real time
+All 6 markdown elements render correctly (headings, bold, italic, lists, links, code)
+Clear button resets both panes
+Page loads with example content already shown
+No console errors on load or interaction
+Page is usable on a 375px wide mobile screen

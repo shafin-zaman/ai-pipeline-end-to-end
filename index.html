@@ -1,4 +1,309 @@
 <!DOCTYPE html>
-<html><head><title>AI Pipeline</title></head>
-<body><h1>Zero Human Touch Pipeline</h1><p>Pipeline source — feature branches deploy here automatically.</p></body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Previewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1d23;
+      color: #e0e0e0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #12151b;
+      border-bottom: 1px solid #2e3340;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #c9d1d9;
+      letter-spacing: 0.02em;
+    }
+
+    header h1 span {
+      color: #58a6ff;
+    }
+
+    .clear-btn {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .clear-btn:hover {
+      background: #30363d;
+      border-color: #58a6ff;
+      color: #58a6ff;
+    }
+
+    .panes {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .pane + .pane {
+      border-left: 1px solid #2e3340;
+    }
+
+    .pane-label {
+      background: #161b22;
+      border-bottom: 1px solid #2e3340;
+      padding: 6px 14px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6e7681;
+      flex-shrink: 0;
+    }
+
+    #editor {
+      flex: 1;
+      background: #0d1117;
+      color: #c9d1d9;
+      border: none;
+      resize: none;
+      padding: 16px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      outline: none;
+    }
+
+    #editor::placeholder {
+      color: #484f58;
+    }
+
+    #preview {
+      flex: 1;
+      background: #0d1117;
+      padding: 16px;
+      overflow-y: auto;
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    /* Markdown preview styles */
+    #preview h1, #preview h2, #preview h3,
+    #preview h4, #preview h5, #preview h6 {
+      color: #c9d1d9;
+      margin: 1em 0 0.4em;
+      font-weight: 600;
+      line-height: 1.3;
+      border-bottom: 1px solid #21262d;
+      padding-bottom: 0.2em;
+    }
+
+    #preview h1 { font-size: 1.6em; }
+    #preview h2 { font-size: 1.3em; }
+    #preview h3 { font-size: 1.1em; }
+
+    #preview p {
+      margin: 0.6em 0;
+      color: #c9d1d9;
+    }
+
+    #preview strong {
+      color: #e6edf3;
+      font-weight: 700;
+    }
+
+    #preview em {
+      color: #c9d1d9;
+      font-style: italic;
+    }
+
+    #preview ul, #preview ol {
+      padding-left: 1.6em;
+      margin: 0.5em 0;
+      color: #c9d1d9;
+    }
+
+    #preview li {
+      margin: 0.25em 0;
+    }
+
+    #preview a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+
+    #preview a:hover {
+      text-decoration: underline;
+    }
+
+    #preview code {
+      background: #161b22;
+      color: #f78166;
+      border-radius: 4px;
+      padding: 0.15em 0.4em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.87em;
+    }
+
+    #preview pre {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      margin: 0.8em 0;
+    }
+
+    #preview pre code {
+      background: none;
+      color: #c9d1d9;
+      padding: 0;
+      font-size: 0.88em;
+    }
+
+    #preview blockquote {
+      border-left: 3px solid #3d444d;
+      margin: 0.6em 0;
+      padding-left: 14px;
+      color: #8b949e;
+    }
+
+    #preview hr {
+      border: none;
+      border-top: 1px solid #21262d;
+      margin: 1em 0;
+    }
+
+    /* Mobile: stack vertically */
+    @media (max-width: 640px) {
+      body {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .panes {
+        flex-direction: column;
+        overflow: visible;
+      }
+
+      .pane + .pane {
+        border-left: none;
+        border-top: 1px solid #2e3340;
+      }
+
+      #editor {
+        min-height: 40vh;
+        resize: vertical;
+      }
+
+      #preview {
+        min-height: 40vh;
+        overflow-y: visible;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span>&#9679;</span> Markdown Previewer</h1>
+  <button class="clear-btn" id="clearBtn">Clear</button>
+</header>
+
+<div class="panes">
+  <div class="pane">
+    <div class="pane-label">Editor</div>
+    <textarea id="editor" spellcheck="false" aria-label="Markdown editor"></textarea>
+  </div>
+  <div class="pane">
+    <div class="pane-label">Preview</div>
+    <div id="preview" aria-label="Rendered preview" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+  const EXAMPLE = `# Welcome to Markdown Previewer
+
+## What you can do
+
+Type **bold text** or _italic text_ in the editor on the left.
+
+### Lists
+
+- Item one
+- Item two
+- Item three
+
+### Links
+
+Visit [marked.js on GitHub](https://github.com/markedjs/marked) for the parser docs.
+
+### Inline code
+
+Use \`console.log('hello')\` to print to the console.
+
+### Code blocks
+
+\`\`\`javascript
+function greet(name) {
+  return \`Hello, \${name}!\`;
+}
+console.log(greet('World'));
+\`\`\`
+
+---
+
+Start editing to see the preview update in **real time**.`;
+
+  const editor = document.getElementById('editor');
+  const preview = document.getElementById('preview');
+  const clearBtn = document.getElementById('clearBtn');
+
+  marked.setOptions({ breaks: true });
+
+  function render(md) {
+    preview.innerHTML = marked.parse(md);
+  }
+
+  editor.addEventListener('input', () => render(editor.value));
+
+  clearBtn.addEventListener('click', () => {
+    editor.value = '';
+    preview.innerHTML = '';
+    editor.focus();
+  });
+
+  // Load example content on first load
+  editor.value = EXAMPLE;
+  render(EXAMPLE);
+</script>
+</body>
 </html>
